@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Topbar -->
+<header class="flex items-center justify-between bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white px-6 py-4 rounded-xl shadow-lg mb-6">
+  <h1 class="text-2xl font-bold tracking-tight">🛒 Point of Sale</h1>
+  <div class="flex items-center gap-4">
+    <div class="hidden sm:flex items-center gap-2">
+      <input type="search" placeholder="Search inventory, sales..."
+             class="px-4 py-2 rounded-md bg-white/90 text-gray-700 border border-gray-300 focus:ring-2 focus:ring-pink-400 focus:outline-none text-sm shadow-sm" />
+    </div>
+    <button id="theme-toggle" class="p-2 rounded-md bg-white text-indigo-600 shadow hover:bg-indigo-100 transition">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+        <path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.1 18.1l.7.7M1 12h1M22 12h1M4.2 19.8l.7-.7M18.1 5.9l.7-.7"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="flex items-center gap-3">
+      <button class="p-2 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-gray-700 shadow hover:from-indigo-200 hover:to-purple-200 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18.5 15.5V11a6 6 0 0 0-5-6V4a2 2 0 1 0-4 0v1a6 6 0 0 0-5 6v4.5c0 .5-.2 1-.6 1.4L2 17h5"/>
+        </svg>
+      </button>
+      <img src="https://i.pravatar.cc/40?img=15" alt="Admin avatar"
+           class="w-9 h-9 rounded-full border-2 border-white shadow-lg ring-2 ring-purple-400/70" />
+    </div>
+  </div>
+</header>
+
+<div class="grid lg:grid-cols-3 gap-6">
+
+  <!-- Live Search + Product Grid -->
+  <div class="lg:col-span-2 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
+    <div class="mb-4">
+      <input id="search-input"
+             placeholder="Search by name, SKU or barcode..."
+             class="w-full px-4 py-2 border rounded-lg text-sm dark:bg-gray-900 dark:border-gray-700 focus:ring-2 focus:ring-emerald-400 focus:outline-none shadow-sm" />
+    </div>
+
+    <div id="results-container">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for m in results %}
+        <div class="border border-gray-200 dark:border-gray-700 p-4 rounded-xl shadow-sm bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 flex justify-between items-center hover:shadow-md transition">
+          <div>
+            <div class="font-semibold text-gray-800 dark:text-white">{{ m.name }}</div>
+            <div class="text-xs text-gray-500 mt-1">Gram: {{ m.gram }} • Karate: {{ m.karate }} • Price: ₦{{ m.price }} • Stock: {{ m.stock }}</div>
+          </div>
+          <a href="{% url 'sales:add_to_cart' m.id %}"
+             class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-full transition shadow">Add</a>
+        </div>
+        {% empty %}
+        <p class="text-gray-500 text-sm">Search results will appear here.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart -->
+  <div class="bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white">🧺 Cart</h3>
+      <a href="{% url 'sales:checkout' %}"
+         class="px-4 py-2 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition shadow {% if not cart.items.all %}pointer-events-none opacity-50{% endif %}">
+        Checkout
+      </a>
+    </div>
+
+    <div class="space-y-3">
+      {% for i in cart.items.all %}
+      <div class="bg-gradient-to-br from-gray-50 to-rose-50 dark:from-gray-900 dark:to-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700 shadow-sm">
+        <div class="flex justify-between items-center">
+          <div class="text-sm font-medium text-gray-800 dark:text-white">{{ i.medicine.name }} <span class="text-xs text-gray-500">(₦{{ i.unit_price }})</span></div>
+          <form method="post" action="{% url 'sales:remove_from_cart' i.id %}">
+            {% csrf_token %}
+            <button class="text-red-600 text-xs hover:underline">Remove</button>
+          </form>
+        </div>
+
+        <form method="post" action="{% url 'sales:update_quantity' i.id %}" class="mt-2 flex items-center gap-2 text-sm">
+          {% csrf_token %}
+          <input type="number" name="quantity" value="{{ i.quantity }}" min="1"
+                 class="w-20 px-2 py-1 border rounded-md dark:bg-gray-900 dark:border-gray-700 focus:ring-1 focus:ring-pink-400">
+          <span class="text-gray-600 dark:text-gray-300">Total: ₦{{ i.line_total }}</span>
+          <button class="px-3 py-1 bg-gradient-to-r from-gray-800 to-gray-700 text-white text-xs rounded-md hover:from-gray-700 hover:to-gray-600 transition">Update</button>
+        </form>
+      </div>
+      {% empty %}
+      <p class="text-gray-500 text-sm">Cart is empty.</p>
+      {% endfor %}
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="mt-5 border-t border-gray-200 dark:border-gray-700 pt-4 text-sm">
+      <div class="flex items-center justify-between font-semibold text-gray-800 dark:text-white">
+        <span>Subtotal</span>
+        <span>₦{{ cart.subtotal }}</span>
+      </div>
+      <div class="text-xs text-gray-500 mt-1">Items: {{ cart.items_count }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for Live Search (unchanged) -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("search-input");
+  const resultsContainer = document.getElementById("results-container");
+  const originalResultsHTML = resultsContainer.innerHTML;
+  let debounceTimer;
+
+  input.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      const q = input.value.trim();
+
+      if (!q) {
+        resultsContainer.innerHTML = originalResultsHTML;
+        return;
+      }
+
+      fetch(`?q=${encodeURIComponent(q)}`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.results.length === 0) {
+          resultsContainer.innerHTML = '<p class="text-gray-500 text-sm">No matches found.</p>';
+          return;
+        }
+
+        resultsContainer.innerHTML = `
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            ${data.results.map(m => `
+              <div class="flex items-center justify-between border rounded-xl p-3 bg-gradient-to-br from-gray-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 hover:shadow-md transition">
+                <div>
+                  <div class="font-medium text-gray-800 dark:text-white">${m.name}</div>
+                  <div class="text-xs text-gray-500">SKU: ${m.sku} • ₦${m.price} • Stock: ${m.stock}</div>
+                </div>
+                <a href="/sales/add_to_cart/${m.id}" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-full transition shadow">Add</a>
+              </div>
+            `).join("")}
+          </div>
+        `;
+      });
+    }, 300);
+  });
+});
+</script>
+{% endblock %}

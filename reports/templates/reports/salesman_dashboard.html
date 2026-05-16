@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Topbar -->
+<header class="flex items-center justify-between mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white px-6 py-4 rounded-xl shadow-lg">
+  <h1 class="text-2xl font-bold">📊 Dashboard</h1>
+  <div class="flex items-center gap-4">
+    <div class="hidden sm:flex items-center gap-2">
+      <input type="search" placeholder="Search inventory, sales..."
+             class="px-4 py-2 rounded-md bg-white/90 text-gray-700 border border-gray-300 focus:ring-2 focus:ring-indigo-400 text-sm shadow-sm" />
+    </div>
+    <button id="theme-toggle" class="p-2 rounded-md hover:bg-indigo-100 bg-white text-indigo-600 shadow transition">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+        <path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.1 18.1l.7.7M1 12h1M22 12h1M4.2 19.8l.7-.7M18.1 5.9l.7-.7"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="flex items-center gap-3">
+      <button class="p-2 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-gray-700 shadow hover:from-indigo-200 hover:to-purple-200 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18.5 15.5V11a6 6 0 0 0-5-6V4a2 2 0 1 0-4 0v1a6 6 0 0 0-5 6v4.5c0 .5-.2 1-.6 1.4L2 17h5"/>
+        </svg>
+      </button>
+      {% if request.user.salesman_profile.profile_pic %}
+        <img src="{{request.user.salesman_profile.profile_pic.url}}" alt="salesman avatar"
+        class="w-9 h-9 rounded-full border-2 border-white shadow-lg ring-2 ring-purple-400/70" />
+      {% else %}
+        <img src="https://i.pravatar.cc/40?img=15" alt="salesman avatar"
+        class="w-9 h-9 rounded-full border-2 border-white shadow-lg ring-2 ring-purple-400/70" />
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<!-- KPI Cards -->
+<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <!-- Sales -->
+  <div class="bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-6 rounded-xl shadow-md transition-transform transform hover:scale-105 hover:shadow-lg">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-lg font-semibold">My Sales ({{ kind }})</span>
+    </div>
+    <div class="text-3xl font-bold">₦{{ sales_total }}</div>
+  </div>
+
+  <!-- Payments -->
+  <div class="bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-6 rounded-xl shadow-md transition-transform transform hover:scale-105 hover:shadow-lg">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-lg font-semibold">My Payments ({{ kind }})</span>
+    </div>
+    <div class="text-3xl font-bold">₦{{ paid_total }}</div>
+  </div>
+
+  <!-- Returns -->
+  <div class="bg-gradient-to-br from-red-500 to-pink-600 text-white p-6 rounded-xl shadow-md transition-transform transform hover:scale-105 hover:shadow-lg">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-lg font-semibold">Returns ({{ kind }})</span>
+    </div>
+    <div class="text-3xl font-bold">₦{{ returns_total }}</div>
+  </div>
+
+  <!-- Net Sales -->
+  <div class="bg-gradient-to-br from-purple-500 to-indigo-600 text-white p-6 rounded-xl shadow-md transition-transform transform hover:scale-105 hover:shadow-lg">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-lg font-semibold">Net Sales ({{ kind }})</span>
+    </div>
+    <div class="text-3xl font-bold">₦{{ net_sales }}</div>
+  </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="mt-8 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 transition hover:shadow-lg">
+  <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">🧾 My Recent Orders</h3>
+  <div class="overflow-x-auto rounded-lg">
+    <table class="min-w-full text-sm text-left">
+      <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+        <tr>
+          <th class="p-3">ID</th>
+          <th class="p-3">Date</th>
+          <th class="p-3">Customer</th>
+          <th class="p-3">Total</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        {% for o in orders %}
+        <tr class="hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-800 transition">
+          <td class="p-3 text-indigo-600 dark:text-indigo-400 font-medium">
+            <a class="hover:underline" href="{% url 'sales:receipt' o.id %}">#{{ o.id }}</a>
+          </td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">{{ o.created_at }}</td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">
+            {% if o.order_type == 'REGULAR' and o.customer_profile %}
+              {{ o.customer_profile.name }}
+            {% else %}
+              {{ o.walk_in_name }}
+            {% endif %}
+          </td>
+          <td class="p-3 font-semibold text-emerald-600 dark:text-emerald-400">₦{{ o.total }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" class="p-3 text-gray-500 text-center">No orders.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Recent Returns -->
+<div class="mt-8 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700 transition hover:shadow-lg">
+  <h3 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">↩️ My Recent Returns</h3>
+  <div class="overflow-x-auto rounded-lg">
+    <table class="min-w-full text-sm">
+      <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+        <tr>
+          <th class="p-3 text-left">ID</th>
+          <th class="p-3 text-left">Date</th>
+          <th class="p-3 text-left">Item</th>
+          <th class="p-3 text-left">Qty Returned</th>
+          <th class="p-3 text-left">Refund</th>
+          <th class="p-3 text-left">Processed By</th>
+          <th class="p-3 text-left">Reason</th>
+          <th class="p-3 text-left">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        {% for r in returns %}
+        <tr class="hover:bg-gradient-to-r hover:from-pink-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-800 transition">
+          <td class="p-3 font-medium text-pink-600 dark:text-pink-400">#{{ r.id }}</td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">{{ r.created_at }}</td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">{{ r.order_item.medicine.name }}</td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">{{ r.quantity }}</td>
+          <td class="p-3 font-semibold text-emerald-600 dark:text-emerald-400">₦{{ r.refund_amount }}</td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">
+            {% if r.processed_by %}
+              {{ r.processed_by.username }}
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td class="p-3 text-gray-600 dark:text-gray-400">{{ r.reason|default:"—" }}</td>
+          <td class="p-3 whitespace-nowrap">
+            <a href="{% url 'sales:return_item' r.id %}"
+               class="px-3 py-1 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-medium shadow hover:from-pink-600 hover:to-purple-700 transition">
+              Process
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="p-3 text-gray-500 dark:text-gray-400 text-center">No return orders.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

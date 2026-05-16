@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Topbar -->
+<header class="flex items-center justify-between mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white px-6 py-4 rounded-xl shadow-lg">
+  <h1 class="text-2xl font-bold">📊 Admin Dashboard</h1>
+  <div class="flex items-center gap-4">
+    <div class="hidden sm:flex items-center gap-2">
+      <input type="search" placeholder="Search inventory, sales..."
+             class="px-4 py-2 rounded-md bg-white/90 text-gray-700 border border-gray-300 focus:ring-2 focus:ring-indigo-400 text-sm shadow-sm" />
+    </div>
+    <button id="theme-toggle" class="p-2 rounded-md hover:bg-indigo-100 bg-white text-indigo-600 shadow transition">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+        <path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.1 18.1l.7.7M1 12h1M22 12h1M4.2 19.8l.7-.7M18.1 5.9l.7-.7"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <div class="flex items-center gap-3">
+      <button class="p-2 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-gray-700 shadow hover:from-indigo-200 hover:to-purple-200 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18.5 15.5V11a6 6 0 0 0-5-6V4a2 2 0 1 0-4 0v1a6 6 0 0 0-5 6v4.5c0 .5-.2 1-.6 1.4L2 17h5"/>
+        </svg>
+      </button>
+      <img src="https://i.pravatar.cc/40?img=15" alt="Admin avatar"
+           class="w-9 h-9 rounded-full border-2 border-white shadow-lg ring-2 ring-purple-400/70" />
+    </div>
+  </div>
+</header>
+
+<!-- KPI Cards -->
+<section class="grid grid-cols-1 md:grid-cols-5 gap-6">
+  <div class="p-5 rounded-xl shadow-md bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+    <div class="flex items-center justify-between">
+      <span class="text-sm opacity-80">Sales ({{ kind }})</span>
+      <span class="text-lg">💰</span>
+    </div>
+    <div class="mt-2 text-2xl font-bold">₦{{ sales_total }}</div>
+  </div>
+  <div class="p-5 rounded-xl shadow-md bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
+    <div class="flex items-center justify-between">
+      <span class="text-sm opacity-80">Payments ({{ kind }})</span>
+      <span class="text-lg">💳</span>
+    </div>
+    <div class="mt-2 text-2xl font-bold">₦{{ paid_total }}</div>
+  </div>
+  <div class="p-5 rounded-xl shadow-md bg-gradient-to-r from-pink-500 to-rose-500 text-white">
+    <div class="flex items-center justify-between">
+      <span class="text-sm opacity-80">Profit ({{ kind }})</span>
+      <span class="text-lg">📈</span>
+    </div>
+    <div class="mt-2 text-2xl font-bold">₦{{ profit_total }}</div>
+  </div>
+  <div class="p-5 rounded-xl shadow-md bg-gradient-to-r from-red-500 to-pink-600 text-white">
+    <div class="flex items-center justify-between">
+      <span class="text-sm opacity-80">Returns ({{ kind }})</span>
+      <span class="text-lg">↩️</span>
+    </div>
+    <div class="mt-2 text-2xl font-bold">₦{{ returns_total }}</div>
+  </div>
+  <div class="p-5 rounded-xl shadow-md bg-gradient-to-r from-purple-500 to-indigo-600 text-white">
+    <div class="flex items-center justify-between">
+      <span class="text-sm opacity-80">Net Sales ({{ kind }})</span>
+      <span class="text-lg">📊</span>
+    </div>
+    <div class="mt-2 text-2xl font-bold">₦{{ net_sales }}</div>
+  </div>
+</section>
+
+<!-- Low Stock -->
+<section class="mt-8 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="font-semibold text-gray-800 dark:text-gray-100">⚠️ Low Stock</h3>
+    <form method="get" class="flex items-center gap-2 text-sm">
+      <select name="range" class="border rounded-md px-2 py-1 dark:bg-gray-900 dark:border-gray-700">
+        <option value="today" {% if kind == "today" %}selected{% endif %}>Today</option>
+        <option value="weekly" {% if kind == "weekly" %}selected{% endif %}>Weekly</option>
+        <option value="monthly" {% if kind == "monthly" %}selected{% endif %}>Monthly</option>
+        <option value="yearly" {% if kind == "yearly" %}selected{% endif %}>Yearly</option>
+      </select>
+      <button class="px-3 py-1 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white shadow">Apply</button>
+    </form>
+  </div>
+  <div class="overflow-x-auto rounded-lg">
+    <table class="min-w-full text-sm">
+      <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+        <tr><th class="p-3 text-left">Name</th><th class="p-3 text-left">Stock</th><th class="p-3 text-left">Reorder</th></tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        {% for m in low_stock %}
+        <tr class="hover:bg-indigo-50 dark:hover:bg-gray-700/50 transition">
+          <td class="p-3">{{ m.name }}</td>
+          <td class="p-3">{{ m.quantity_in_stock }}</td>
+          <td class="p-3">{{ m.reorder_level }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="p-3 text-gray-500 dark:text-gray-400 text-center">None.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Recent Orders -->
+<section class="mt-8 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
+  <h3 class="font-semibold mb-4 text-gray-800 dark:text-gray-100">🧾 Recent Orders</h3>
+  <div class="overflow-x-auto rounded-lg">
+    <table class="min-w-full text-sm">
+      <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+        <tr><th class="p-3 text-left">ID</th><th class="p-3 text-left">Date</th><th class="p-3 text-left">Customer</th><th class="p-3 text-left">Total</th><th class="p-3 text-left">Salesman</th></tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        {% for o in orders %}
+        <tr class="hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-800 transition">
+          <td class="p-3 font-medium text-indigo-600 dark:text-indigo-400">#{{ o.id }}</td>
+          <td class="p-3">{{ o.created_at }}</td>
+          <td class="p-3">{% if o.order_type == 'REGULAR' and o.customer_profile %}{{ o.customer_profile.name }}{% else %}{{ o.walk_in_name }}{% endif %}</td>
+          <td class="p-3 font-semibold text-emerald-600 dark:text-emerald-400">₦{{ o.total }}</td>
+          <td class="p-3">{{ o.salesman }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="p-3 text-gray-500 dark:text-gray-400 text-center">No orders.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Recent Returns -->
+<section class="mt-8 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-xl shadow-md border border-gray-100 dark:border-gray-700">
+  <h3 class="font-semibold mb-4 text-gray-800 dark:text-gray-100">↩️ Recent Returns</h3>
+  <div class="overflow-x-auto rounded-lg">
+    <table class="min-w-full text-sm">
+      <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+        <tr><th class="p-3 text-left">ID</th><th class="p-3 text-left">Date</th><th class="p-3 text-left">Item</th><th class="p-3 text-left">Qty</th><th class="p-3 text-left">Refund</th><th class="p-3 text-left">Processed By</th></tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        {% for r in returns %}
+        <tr class="hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 dark:hover:from-gray-700 dark:hover:to-gray-800 transition">
+          <td class="p-3 font-medium text-red-600 dark:text-red-400">#{{ r.id }}</td>
+          <td class="p-3">{{ r.created_at }}</td>
+          <td class="p-3">{{ r.order_item.medicine.name }}</td>
+          <td class="p-3">{{ r.quantity }}</td>
+          <td class="p-3 font-semibold text-red-600 dark:text-red-400">₦{{ r.refund_amount }}</td>
+          <td class="p-3">{{ r.processed_by }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="p-3 text-gray-500 dark:text-gray-400 text-center">No returns.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="mt-10 text-center text-sm text-gray-500 dark:text-gray-400">
+  © <span id="year"></span> Developed by <span class="font-semibold text-indigo-600">Binumar Digital Services</span>
+</footer>
+
+{% endblock %}

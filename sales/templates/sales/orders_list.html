@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Topbar -->
+<header class="flex items-center justify-between mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white px-6 py-4 rounded-xl shadow-lg">
+  <h1 class="text-2xl font-bold">📦 Orders</h1>
+  <div class="flex items-center gap-4">
+    <!-- Search -->
+    <div class="hidden sm:flex items-center gap-2">
+      <input type="search" placeholder="Search inventory, sales..."
+             class="px-4 py-2 rounded-md bg-white/90 text-gray-700 border border-gray-300 focus:ring-2 focus:ring-indigo-400 text-sm shadow-sm" />
+    </div>
+    <!-- Theme toggle -->
+    <button id="theme-toggle" class="p-2 rounded-md hover:bg-indigo-100 bg-white text-indigo-600 shadow transition">
+      <svg class="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+        <path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.1 18.1l.7.7M1 12h1M22 12h1M4.2 19.8l.7-.7M18.1 5.9l.7-.7"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <!-- Notification + Avatar -->
+    <div class="flex items-center gap-3">
+      <button class="p-2 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-gray-700 shadow hover:from-indigo-200 hover:to-purple-200 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18.5 15.5V11a6 6 0 0 0-5-6V4a2 2 0 1 0-4 0v1a6 6 0 0 0-5 6v4.5c0 .5-.2 1-.6 1.4L2 17h5"/>
+        </svg>
+      </button>
+      <img src="https://i.pravatar.cc/40?img=15" alt="Admin avatar"
+           class="w-9 h-9 rounded-full border-2 border-white shadow-lg ring-2 ring-purple-400/70" />
+    </div>
+  </div>
+</header>
+
+<!-- Orders Table -->
+<div class="bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-6 rounded-2xl shadow-md border border-gray-100 dark:border-gray-700">
+  <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">🧾 Recent Orders</h2>
+  <div class="overflow-x-auto rounded-lg">
+    <table class="min-w-full text-sm">
+      <thead class="text-xs uppercase bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+        <tr>
+          <th class="p-3 text-left">ID</th>
+          <th class="p-3 text-left">Date</th>
+          <th class="p-3 text-left">Customer</th>
+          <th class="p-3 text-left">Gram</th>
+          <th class="p-3 text-left">Karate</th>
+          <th class="p-3 text-left">Total</th>
+          <th class="p-3 text-left">Salesman</th>
+          <th class="p-3 text-left">Status</th>
+          <th class="p-3 text-left">Action</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+        {% for o in orders %}
+        <tr class="hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 dark:hover:from-gray-700 dark:hover:to-gray-800 transition">
+          <td class="p-3 font-medium text-indigo-600 dark:text-indigo-400">
+            <a class="hover:underline" href="{% url 'sales:receipt' o.id %}">#{{ o.id }}</a>
+          </td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">{{ o.created_at }}</td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">
+            {% if o.order_type == 'REGULAR' and o.customer_profile %}
+              {{ o.customer_profile.name }}
+            {% else %}
+              {{ o.walk_in_name }}
+            {% endif %}
+          </td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">{{ o.gram }}</td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">{{ o.karate }}</td>
+          <td class="p-3 font-semibold text-emerald-600 dark:text-emerald-400">₦{{ o.total }}</td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">{{ o.salesman }}</td>
+          <td class="p-3">
+            {% if o.status == "COMPLETED" %}
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-green-400 to-green-600 text-white shadow-sm">Completed</span>
+            {% elif o.status == "PENDING" %}
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-sm">Pending</span>
+            {% elif o.status == "CANCELLED" %}
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-white shadow-sm">Cancelled</span>
+            {% else %}
+              <span class="px-3 py-1 text-xs font-medium rounded-full bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200"> {{ o.status }} </span>
+            {% endif %}
+          </td>
+          <td class="p-3 text-gray-700 dark:text-gray-300">
+            <span><a href="{% url 'sales:return-receipt' o.id %}" class="px-3 py-1 rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-medium shadow hover:from-pink-600 hover:to-purple-700 transition">Return</a></span>
+            <span><a href="{% url 'sales:receipt' o.id %}" class="px-3 py-1 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white text-xs font-medium shadow hover:from-green-600 hover:to-gren-700 transition">Reciept</a></span>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="p-3 text-gray-500 dark:text-gray-400 text-center">No orders.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
