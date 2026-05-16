@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="min-h-screen flex">
+  <main class="flex-1 p-6">
+    
+    <!-- Topbar -->
+    <header class="flex items-center justify-between mb-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white px-6 py-4 rounded-xl shadow-lg">
+      <h1 class="text-2xl font-bold">{{ title }}</h1>
+      <div class="flex items-center gap-4">
+        <!-- Dark Theme Toggle -->
+        <button id="theme-toggle" class="p-2 rounded-md hover:bg-indigo-100 bg-white text-indigo-600 shadow transition">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" stroke="currentColor" fill="none">
+            <path d="M12 3v1M12 20v1M4.2 4.2l.7.7M18.1 18.1l.7.7M1 12h1M22 12h1M4.2 19.8l.7-.7M18.1 5.9l.7-.7"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <!-- Notifications -->
+        <button class="p-2 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 text-gray-700 shadow hover:from-indigo-200 hover:to-purple-200 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18.5 15.5V11a6 6 0 0 0-5-6V4a2 2 0 1 0-4 0v1a6 6 0 0 0-5 6v4.5c0 .5-.2 1-.6 1.4L2 17h5"/>
+          </svg>
+        </button>
+
+        <!-- Profile -->
+        <img src="https://i.pravatar.cc/40?img=23" alt="Admin avatar"
+             class="w-9 h-9 rounded-full border-2 border-white shadow-lg ring-2 ring-pink-400/70" />
+      </div>
+    </header>
+
+    <!-- Add/Edit Medicine Form -->
+    <div class="max-w-3xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
+      <h2 class="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-100">{{ title }}</h2>
+      
+      <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {% csrf_token %}
+
+        {% for field in form %}
+          <div class="flex flex-col">
+            <label for="{{ field.id_for_label }}" class="text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.errors %}
+              <p class="mt-1 px-2 py-1 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs rounded">
+                {{ field.errors|join:", " }}
+              </p>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <!-- Buttons -->
+        <div class="md:col-span-2 flex gap-4 mt-6">
+          <button type="submit" 
+                  class="flex-1 px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow hover:from-green-600 hover:to-emerald-700 transition">
+            💾 Save
+          </button>
+          <a href="{% url 'inventory:medicine_list' %}"
+             class="flex-1 px-4 py-2 rounded-xl bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition text-center">
+            ✖ Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </main>
+</div>
+
+<!-- Tailwind form overrides -->
+<style>
+  form input, form select, form textarea {
+    @apply w-full px-3 py-2 border rounded-xl bg-white dark:bg-gray-900 dark:border-gray-700 shadow-sm focus:ring-2 focus:ring-indigo-400;
+  }
+</style>
+{% endblock %}

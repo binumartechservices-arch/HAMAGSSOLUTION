@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Login</title>
+  <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+  <link rel="stylesheet" href="{% static 'src/output.css' %}">
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+
+  <!-- Main Login Section -->
+  <main class="flex-grow flex items-center justify-center">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
+      
+      <!-- Inner Header -->
+      <div class="flex flex-col items-center mb-6">
+        <!-- Padlock Icon -->
+        <!-- <svg class="w-12 h-12 text-blue-600 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2h-1V7a5 5 0 10-10 0v4H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+        </svg> -->
+        <img src="{{company.logo.url}}" alt="company logo" class="h-20">
+        <h2 class="text-xl font-bold text-gray-800">LOGIN</h2>
+        <p class="text-sm text-gray-500">HAMAGS SOLUTIONS L.T.D</p>
+      </div>
+
+      <!-- Login Form -->
+      <form class="space-y-4" method="POST">
+        {% csrf_token %}
+        <div>
+          <label class="block text-gray-700 text-sm font-medium">Email</label>
+          <input type="text" class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your email" name="username">
+        </div>
+        
+        <div>
+          <label class="block text-gray-700 text-sm font-medium">Password</label>
+          <input type="password" class="mt-1 block w-full px-3 py-2 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your password" name="password">
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+          Login
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="shadow p-4 text-center text-sm text-gray-500">
+    Developed by Binumar Digital Services
+  </footer>
+</body>
+</html>
